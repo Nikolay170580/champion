@@ -62,7 +62,8 @@ func DayActionInfo(data string, weight, height float64) string {
 	distanceKm := distanceM / float64(mInKm)
 
 	// Вычислить количество калорий
-	calories := WalkingSpentCalories(steps, duration, weight, height)
+	calories := 
+	WalkingSpentCalories(steps, duration, weight, height)
 
 	// Формирование и возврат строки
 	return fmt.Sprintf(
