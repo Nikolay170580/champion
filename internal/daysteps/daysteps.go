@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+"github.com/Yandex-Practicum/tracker/internal/spentcalories"
 )
 
 const (
