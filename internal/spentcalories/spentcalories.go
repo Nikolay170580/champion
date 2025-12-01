@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -132,9 +133,9 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 	durationHours := duration.Hours()
 
 	// Отсечение до 2 знаков (не округление!) — важно для 590.625 → 590.62
-	dist = float64(int(dist*100)) / 100
-	speed = float64(int(speed*100)) / 100
-	calories = float64(int(calories*100)) / 100
+	dist = math.Round(dist*100) / 100
+	speed = math.Round(speed*100) / 100
+	calories = math.Round(calories*100) / 100
 
 	return fmt.Sprintf(
 		"Тип тренировки: %s\n"+
