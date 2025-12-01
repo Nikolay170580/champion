@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	"github.com/Yandex-Practicum/tracker/internal/spentcalories"
 )
 
@@ -17,63 +18,57 @@ const (
 )
 
 func parsePackage(data string) (int, time.Duration, error) {
-	// TODO: реализовать функцию
-
-	// Разделяем введенную строку на слайс строк по запятой
 	parts := strings.Split(data, ",")
-	// Проверяем длину слайса на равность 2
 	if len(parts) != 2 {
-		return 0, 0, fmt.Errorf("некорректный формат даннных")
-	}
-	stepsStr := parts[0]
-	durationStr := parts[1]
-
-	// Проверка на пробелы 
-	if strings.ContainsAny(stepsStr,"\t\n\r") || strings.ContainsAny(durationStr,"\t\n\r") {
-	return 0,0, fmt.Errorf("некоректный формат данных")
+		return 0, 0, fmt.Errorf("invalid data format")
 	}
 
-	// Преобразование первого элемента слайса в количество шагов
-	steps, err := strconv.Atoi(strepsStr)
+	stepsStr := strings.TrimSpace(parts[0])
+	durationStr := strings.TrimSpace(parts[1])
+
+	// Проверка на управляющие символы
+	if strings.ContainsAny(stepsStr+durationStr, "\t\n\r") {
+		return 0, 0, fmt.Errorf("Invalid data format: control characters are not allowed")
+	}
+
+	// Парсим шаги
+	steps, err := strconv.Atoi(stepsStr)
 	if err != nil {
-		return 0, 0, fmt.Errorf("невозможно преобразовать шаги в число")
+		return 0, 0, fmt.Errorf("cannot convert steps to a number: %w", err)
 	}
-	// Проверить: количество шагов должно быть больше 0
 	if steps <= 0 {
-		return 0, 0, fmt.Errorf("количество шагов должно быть больше 0")
+		return 0, 0, fmt.Errorf("The number of steps must be greater than 0")
 	}
-	// Преобразовать второй элемент слайса в time.Duration
+
+	// Парсим длительность
 	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
-		return 0, 0, fmt.Errorf("невозможно распознать продолжительность")
+		return 0, 0, fmt.Errorf("unable to recognize the duration %q: %w", durationStr, err)
 	}
-	// Проверка на продолжительность более 0
 	if duration <= 0 {
-		return 0,0,fmt.Errorf("продолжительность должна быть долбше 0")
+		return 0, 0, fmt.Errorf("the duration must be greater than 0")
 	}
-	// Если всё прошло без ошибок, возвращаем количество шагов, продолжительность и nil
+
 	return steps, duration, nil
 }
 
 func DayActionInfo(data string, weight, height float64) string {
-	// TODO: реализовать функцию
-
-	// Получить данные с помощью parsePackage()
 	steps, duration, err := parsePackage(data)
 	if err != nil {
-		log.Println("Ошибка:", err)
+		log.Println("Error:", err)
 		return ""
 	}
-	// Вычислить дистанцию в метрах: шаги × длина шага
-	distanceM := float64(steps) * stepLength
 
-	// Перевести дистанцию в километры
+	distanceM := float64(steps) * stepLength
 	distanceKm := distanceM / float64(mInKm)
 
-	// Вычислить количество калорий
-	calories := spentcalories.WalkingSpentCalories(steps, duration, weight, height)
+	// ✅ Правильный порядок аргументов + обработка ошибки
+	calories, err := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
+	if err != nil {
+		log.Println("Calorie calculation error:", err)
+		return ""
+	}
 
-	// Формирование и возврат строки
 	return fmt.Sprintf(
 		"Количество шагов: %d.\n"+
 			"Дистанция составила %.2f км.\n"+
